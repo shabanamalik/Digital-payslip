@@ -1,0 +1,187 @@
+{
+  "name": "Payroll in a Click",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f86c798e-e7fe-44f9-a6ef-64675952d28e",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "16SZvncx1QdqZ9viBgiA1XDcptv_2sQgxW1AmLZe3H8g",
+          "mode": "list",
+          "cachedResultName": "Employee Payroll System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16SZvncx1QdqZ9viBgiA1XDcptv_2sQgxW1AmLZe3H8g/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "MONTHLY PAYROL_NOV2025",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16SZvncx1QdqZ9viBgiA1XDcptv_2sQgxW1AmLZe3H8g/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "11dd462c-e700-4c0a-a5e1-9f34c2724f88",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2ObgHHjgsrKehbUE",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3838cf7a-27d7-4419-9a28-bcced38bbcd0",
+              "name": "=Gross_Salary",
+              "value": "={{ $json.Basic_Salary + $json.General_Overtime + $json.Gazetted_Overtime }}",
+              "type": "string"
+            },
+            {
+              "id": "bfe52df4-23d2-49bc-aba3-ad86f293d53c",
+              "name": "Total_Deductions",
+              "value": "={{ $json.Shop_Deduction + $json.Canteen_Deduction +$json['OTHER DEDUCTIONS'] }}",
+              "type": "string"
+            },
+            {
+              "id": "94e63e59-873f-4976-9d0f-f0f7f6664cc3",
+              "name": "Net_Pay",
+              "value": "={{ $json.Basic_Salary + $json.General_Overtime +$json.Gazetted_Overtime - $json.Shop_Deduction +  $json.Canteen_Deduction + $json['OTHER DEDUCTIONS']}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "35dd4112-36b5-4dc4-a2fb-95bf6a34433e",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "sendTo": "shabanava066@gmail.com",
+        "subject": "=Salary Slip for November 2025 - {{ $('Get row(s) in sheet').item.json.Employee_Name }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; font-size: 14px; max-width: 600px; margin: auto; border: 1px solid #ccc; padding: 20px;\">\n    <h2 style=\"text-align: center; margin-top: 0;\">Salary Slip</h2>\n    <hr>\n    <p><b>Name:</b>{{ $('Get row(s) in sheet').item.json.Employee_Name }} <br><b>Designation:</b> {{ $('Get row(s) in sheet').item.json.Designation }}</p>\n    <hr>\n    <h4 style=\"margin-bottom: 5px;\">Attendance Summary</h4>\n    <p>Present Days: <b>{{ $('Get row(s) in sheet').item.json['PRESENT DAYS'] }}</b> | Leave Days: <b></b>{{ $('Get row(s) in sheet').item.json['LEAVE DAYS'] }}</p>\n    <hr>\n    <h4 style=\"margin-bottom: 5px;\">Earnings</h4>\n    <table style=\"width:100%;\">\n        <tr><td>Basic Salary:</td><td style=\"text-align:right;\">{{ $('Get row(s) in sheet').item.json.Basic_Salary }}</td></tr>\n        <tr><td>General Overtime:</td><td style=\"text-align:right;\">{{ $('Get row(s) in sheet').item.json.General_Overtime }}</td></tr>\n        <tr><td>Gazetted Overtime:</td><td style=\"text-align:right;\">{{ $('Get row(s) in sheet').item.json.Gazetted_Overtime }}</td></tr>\n        <tr style=\"font-weight: bold;\"><td>Total Earning:</td><td style=\"text-align:right;\">{{ $json.Gross_Salary }}</td></tr>\n    </table>\n    <hr>\n    <h4 style=\"margin-bottom: 5px;\">Deductions</h4>\n    <table style=\"width:100%;\">\n        <tr><td>Shop:</td><td style=\"text-align:right;\">{{ $('Get row(s) in sheet').item.json.Shop_Deduction }}</td></tr>\n        <tr><td>Canteen:</td><td style=\"text-align:right;\">{{ $('Get row(s) in sheet').item.json.Canteen_Deduction }}</td></tr>\n        <tr style=\"font-weight: bold;\"><td>Total Deductions:</td><td style=\"text-align:right;\">{{ $json.Total_Deductions }}</td></tr>\n    </table>\n    <hr>\n    <h3 style=\"text-align: right;\">Net Payable: {{ $json.Net_Pay }}</h3>\n</div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        608,
+        -80
+      ],
+      "id": "ef58adb1-d76f-46cf-ab56-0eb8a1a0b79d",
+      "name": "Send a message",
+      "webhookId": "d6fb7c4b-14f3-4702-884e-431acf620eaa",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FQ78eIyPe1A8xUaH",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "+17152604547",
+        "to": "+923106914780",
+        "message": "=SALARY SLIP\nName: {{ $('Get row(s) in sheet').item.json.Employee_Name }}\n---\nATTENDANCE:\nPresent: {{ $('Get row(s) in sheet').item.json['PRESENT DAYS'] }}\nLeave: {{ $('Get row(s) in sheet').item.json['LEAVE DAYS'] }}\n---\nEARNINGS:\nBasic: {{ $('Get row(s) in sheet').item.json.Basic_Salary }}\nGen OT:{{ $('Get row(s) in sheet').item.json.General_Overtime }}\nGaz OT: {{ $('Get row(s) in sheet').item.json.Gazetted_Overtime }}\n= Gross: {{ $json.Gross_Salary }}\n---\nDEDUCTIONS:\nShop:{{ $('Get row(s) in sheet').item.json.Shop_Deduction }}\nCanteen: {{ $('Get row(s) in sheet').item.json.Canteen_Deduction }}\n= Total Ded: {{ $json.Total_Deductions }}\n---\nNET PAYABLE: {{ $json.Net_Pay }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        608,
+        112
+      ],
+      "id": "53c68ebe-294e-4873-b86a-b8bf424dc945",
+      "name": "Send an SMS/MMS/WhatsApp message",
+      "credentials": {
+        "twilioApi": {
+          "id": "4XaXuHMiCpOmeCj8",
+          "name": "Twilio account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send an SMS/MMS/WhatsApp message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send an SMS/MMS/WhatsApp message": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3e34be35-48d7-4da4-9f49-e8e307014207",
+  "meta": {
+    "instanceId": "f0b41ed3447e70cf0e39aa014b36ffd51f6e09e2ace954d862a7beb025e4288d"
+  },
+  "id": "lr4IXSSTJ5d3Sje5",
+  "tags": []
+}
